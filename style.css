@@ -1,0 +1,46 @@
+body {
+    background-color: #1a1a1a;
+    color: white;
+    font-family: Arial, sans-serif;
+
+    text-align: center;
+    padding: 100px;
+}
+
+h1 {
+    color:blueviolet
+}
+
+blockquote {
+    font-style: italic;
+    color: chocolate;
+    margin: 30px 0;
+}
+
+.card {
+    background-color: #2a2a2a;
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 45px;
+    border-radius: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+ol {
+    list-style: none;
+    padding: 0;
+}
+
+h2 {
+    margin-top: 40px;
+    margin-bottom: 15px;
+}
+
+a {
+    color: #9b59ff;
+}
