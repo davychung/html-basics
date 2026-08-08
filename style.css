@@ -31,28 +31,32 @@
     box-sizing: border-box;
 }
 
-main {
-    max-width: 1100px;
+.container {
+    width: 90%;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
 nav {
     display: flex;
-    justify-content: left;
+    justify-content: flex-start;
     gap: 40px;
-    margin-bottom: 2cm;
+    margin-bottom: 3rem;
     position: sticky;
     top: 0px;
     background-color: var(--surface);
-    padding: 20px;
+    padding: 1.25rem;
     border-radius: 10px;
+    z-index: 100;
 }
 
 .hero-content{
-    margin: 250px 0;
+    padding: 6rem 0;
     font-size: 1.2em;
     display: flex;
-    gap: 20px;
+    gap: 2rem;
+    align-items: center;
+    justify-content: center;
 }
 
 
@@ -228,9 +232,6 @@ blockquote {
 
 .project-card {
     background-color: var(--surface);
-    width: 90%;
-    max-width: 1000px;
-    margin: 0px auto;
     padding: 45px;
     border-radius: 10px;
     box-shadow: 0 8px 20px var(--shadow);
@@ -241,6 +242,12 @@ blockquote {
     width:100%;
     border-radius:10px;
     margin: 20px 0;
+}
+
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
 }
 
 .tech-stack {
@@ -267,6 +274,11 @@ blockquote {
 
     body {
         padding: 20px;
+    }
+
+    .hero-content{
+        flex-direction: column;
+        text-align: center;
     }
 
     .hero-buttons {
@@ -316,6 +328,39 @@ a {
 .skills-card:hover {
     box-shadow: 0 0px 10px var(--shadow-hover);
     transform: translateY(-5px);
+}
+
+#about {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+footer {
+    margin-top: 80px;
+    padding-top: 20px;
+    text-align: left;
+    border-top: 1px solid var(--surface-light);
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-links {
+    display: flex;
+    gap: 20px;
+}
+
+footer > p {
+    margin-top: 30px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.footer-brand h2 {
+    margin-top: 0;
 }
 
 /*
