@@ -363,6 +363,40 @@ footer > p {
     margin-top: 0;
 }
 
+/* Project Page Specific Styles */
+
+.projectpage-header {
+    padding: 1.5rem 0 2rem;
+}
+
+.projectpage-header h1 {
+    font-size: 4rem;
+    margin-bottom: 10px;
+}
+
+.projectpage-header p {
+    color: var(--text-secondary);
+}
+
+.projectpage-section {
+    text-align: left;
+    background-color: var(--surface);
+    border: 1px solid var(--surface-light);
+    border-radius: 10px;
+    padding: 35px;
+    margin: 25px 0;
+    box-shadow: 0 8px 20px var(--shadow);
+}
+
+.projectpage-section h2, h3 {
+    margin-top: 0;
+}
+
+.projectpage-section p {
+    line-height: 1.6;
+}
+
+
 /*
 Content -> What's inside
 Padding -> Space inside
