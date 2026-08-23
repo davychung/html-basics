@@ -24,6 +24,118 @@
     </header>
 
     <main>
+
+        <section class="projectpage-section">
+            <h2>Log Activity</h2>
+
+            <form id="activity-form">
+                <label for="activity-type">Activity Type</label>
+
+                <select id="activity-type" required>
+                    <option value="learning">Learning</option>
+                    <option value="building">Building</option>
+                    <option value="problem-solving">Problem Solving</option>
+                    <option value="career">Career</option>
+                    <option value="creativity">Creativity</option>
+                </select>
+
+                <label for="activity-amount">Hours</label>
+                <input
+                    type="number"
+                    id="activity-amount"
+                    min="1"
+                    placeholder="2"
+                    required
+                >
+
+                <label for="activity-description">Description</label>
+                <input
+                    type="text"
+                    id="activity-description"
+                    placeholder="Learned JavaScript DOM basics"
+                    required
+                >
+
+                <button type="submit">Add Activity</button>
+
+                <div id="xp-result">
+                <p>Total XP: <span id="total-xp">0</span></p>
+                </div>
+            </form>
+
+            <p>Level: <span id="level">1</span></p>
+
+            <div class="level-progress">
+                <p id="next-level-text">0 XP to next level</p>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="level-progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="dimension-row">
+                <div class="dimension-label">
+                    <span>Building</span>
+                    <span id="building-xp">0 XP</span>
+                </div>
+
+                <div class="dimension-bar">
+                    <div class="dimension-fill" id="building-fill"></div>
+                </div>
+            </div>
+
+            <div class="dimension-row">
+                <div class="dimension-label">
+                    <span>Problem Solving</span>
+                    <span id="problem-solving-xp">0 XP</span>
+                </div>
+
+                <div class="dimension-bar">
+                    <div class="dimension-fill" id="problem-solving-fill"></div>
+                </div>
+            </div>
+
+            <div class="dimension-row">
+                <div class="dimension-label">
+                    <span>Learning</span>
+                    <span id="learning-xp">0 XP</span>
+                </div>
+
+                <div class="dimension-bar">
+                    <div class="dimension-fill" id="learning-fill"></div>
+                </div>
+            </div>
+            
+            <div class="dimension-row">
+                <div class="dimension-label">
+                    <span>Career</span>
+                    <span id="career-xp">0 XP</span>
+                </div>
+
+                <div class="dimension-bar">
+                    <div class="dimension-fill" id="career-fill"></div>
+                </div>
+            </div>
+            
+            <div class="dimension-row">
+                <div class="dimension-label">
+                    <span>Creativity</span>
+                    <span id="creativity-xp">0 XP</span>
+                </div>
+
+                <div class="dimension-bar">
+                    <div class="dimension-fill" id="creativity-fill"></div>
+                </div>
+            </div>
+
+
+            <div class="recent-activity">
+                <h3>Recent Activity</h3>
+                <ul id="activity-list"></ul>
+            </div>
+
+        </section>
+
         <div class="container">
 
             <section class="projectpage-section">
@@ -137,4 +249,5 @@
 
         </div>
     </main>
+    <script src="career-xp.js"></script>
 </body>
