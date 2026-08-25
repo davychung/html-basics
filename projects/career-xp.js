@@ -86,19 +86,44 @@ function calculateXP(activityType, amount) {
     return rule.xpPerHour * amount;
 }
 
-function allocateDimensionXP(activityType, xpEarned) {
+function calculateDimensionAllocations(activityType, xpEarned) {
     const dimensions = activityRules[activityType].dimensions;
     const dimensionAllocations = {};
 
     for (const dimension in dimensions) {
         const allocation = dimensions[dimension];
-        const allocatedXP = xpEarned * allocation;
-        
-        dimensionXP[dimension] += allocatedXP;
-        dimensionAllocations[dimension] = allocatedXP;
+
+        dimensionAllocations[dimension] =
+            xpEarned * allocation;
     }
-    
+
     return dimensionAllocations;
+}
+
+function evaluateCareerEvent(careerEvent) {
+    const xpEarned = calculateXP(
+        careerEvent.activityType,
+        careerEvent.measurements.hours
+    );
+
+    const dimensions = calculateDimensionAllocations(
+        careerEvent.activityType,
+        xpEarned
+    );
+
+    return {
+        xpEarned,
+        dimensions
+    };
+}
+
+function applyEvaluationToState(evaluation) {
+    totalXP += evaluation.xpEarned;
+
+    for (const dimension in evaluation.dimensions) {
+        dimensionXP[dimension] +=
+            evaluation.dimensions[dimension];
+    }
 }
 
 function calculateLevel(totalXP) {
@@ -152,26 +177,25 @@ function updateLevelProgress(totalXP, currentLevel) {
 function createCareerEvent(
     activityType,
     amount,
-    activityDescription,
-    xpEarned,
-    dimensionAllocations
+    activityDescription
 ) {
     return {
         id: Date.now(),
-        type: activityType,
-        amount,
+        activityType,
+        measurements: {
+            hours: amount
+        },
         description: activityDescription,
-        xpEarned,
-        dimensions: dimensionAllocations,
-        createdAt: new Date().toISOString()
+        source: "manual",
+        timestamp: new Date().toISOString()
     };
 }
 
-function renderRecentActivity(careerEvent){
+function renderRecentActivity(careerEvent, xpEarned) {
     const activityItem = document.createElement("li");
 
     activityItem.textContent =
-        `${careerEvent.description} — ${careerEvent.type} — +${careerEvent.xpEarned} XP`;
+        `${careerEvent.description} — ${careerEvent.activityType} — +${xpEarned} XP`;
 
     activityList.prepend(activityItem);
 
@@ -200,12 +224,9 @@ function updateDashboard() {
 
 function restoreCareerEvents() {
     for (const careerEvent of careerEvents) {
-        totalXP += careerEvent.xpEarned;
+        const evaluation = evaluateCareerEvent(careerEvent);
 
-        for (const dimension in careerEvent.dimensions) {
-            dimensionXP[dimension] +=
-                careerEvent.dimensions[dimension];
-        }
+        applyEvaluationToState(evaluation);
     }
 
     updateDashboard();
@@ -213,7 +234,12 @@ function restoreCareerEvents() {
     const recentEvents = careerEvents.slice(0, 5).reverse();
 
     for (const careerEvent of recentEvents) {
-        renderRecentActivity(careerEvent);
+        const evaluation = evaluateCareerEvent(careerEvent);
+
+        renderRecentActivity(
+            careerEvent,
+            evaluation.xpEarned
+        );
     }
 }
 
@@ -238,20 +264,15 @@ activityForm.addEventListener("submit", function(event) {
         return;
     }
 
-    const xpEarned = calculateXP(activityType, amount);
-
-    console.log("XP Earned:", xpEarned);
-
-    totalXP += xpEarned;
-    const dimensionAllocations = allocateDimensionXP(activityType, xpEarned);
-
     const careerEvent = createCareerEvent(
-        activityType,
-        amount,
-        activityDescription,
-        xpEarned,
-        dimensionAllocations
+    activityType,
+    amount,
+    activityDescription
     );
+
+    const evaluation = evaluateCareerEvent(careerEvent);
+
+    applyEvaluationToState(evaluation);
     
     careerEvents.unshift(careerEvent);
 
@@ -264,7 +285,10 @@ activityForm.addEventListener("submit", function(event) {
 
     updateDashboard();
 
-    renderRecentActivity(careerEvent);
+    renderRecentActivity(
+    careerEvent,
+    evaluation.xpEarned
+    );
 
     console.log("Type:", activityType);
     console.log("Amount:", activityAmount);
