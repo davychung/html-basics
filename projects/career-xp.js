@@ -38,7 +38,12 @@ const dimensionXP = {
     creativity: 0
 };
 
-const careerEvents = [];
+const storedCareerEvents =
+    localStorage.getItem("careerXPEvents");
+
+const careerEvents = storedCareerEvents
+    ? JSON.parse(storedCareerEvents)
+    : [];
 
 const activityList = document.getElementById("activity-list");
 
@@ -75,7 +80,7 @@ const activityRules = {
 };
 
 
-function calculateXP(activityType, amount){
+function calculateXP(activityType, amount) {
     const rule = activityRules[activityType];
 
     return rule.xpPerHour * amount;
@@ -83,7 +88,7 @@ function calculateXP(activityType, amount){
 
 function allocateDimensionXP(activityType, xpEarned) {
     const dimensions = activityRules[activityType].dimensions;
-    const dimensionAllocations ={};
+    const dimensionAllocations = {};
 
     for (const dimension in dimensions) {
         const allocation = dimensions[dimension];
@@ -91,9 +96,6 @@ function allocateDimensionXP(activityType, xpEarned) {
         
         dimensionXP[dimension] += allocatedXP;
         dimensionAllocations[dimension] = allocatedXP;
-
-        dimensionDisplays[dimension].xp.textContent =
-            `${dimensionXP[dimension]} XP`;
     }
     
     return dimensionAllocations;
@@ -154,7 +156,7 @@ function createCareerEvent(
     xpEarned,
     dimensionAllocations
 ) {
-    return{
+    return {
         id: Date.now(),
         type: activityType,
         amount,
@@ -178,6 +180,52 @@ function renderRecentActivity(careerEvent){
     }
 }
 
+function updateDashboard() {
+    totalXPDisplay.textContent = totalXP;
+
+    for (const dimension in dimensionXP) {
+        dimensionDisplays[dimension].xp.textContent =
+            `${dimensionXP[dimension]} XP`;
+    }
+
+    const currentLevel = calculateLevel(totalXP);
+    const currentRank = calculateRank(currentLevel);
+
+    levelDisplay.textContent =
+        `${currentLevel} (${currentRank})`;
+
+    updateLevelProgress(totalXP, currentLevel);
+    updateDimensionBars();
+}
+
+function restoreCareerEvents() {
+    for (const careerEvent of careerEvents) {
+        totalXP += careerEvent.xpEarned;
+
+        for (const dimension in careerEvent.dimensions) {
+            dimensionXP[dimension] +=
+                careerEvent.dimensions[dimension];
+        }
+    }
+
+    updateDashboard();
+
+    const recentEvents = careerEvents.slice(0, 5).reverse();
+
+    for (const careerEvent of recentEvents) {
+        renderRecentActivity(careerEvent);
+    }
+}
+
+function saveCareerEvents() {
+    localStorage.setItem(
+        "careerXPEvents",
+        JSON.stringify(careerEvents)
+    );
+}
+
+restoreCareerEvents();
+
 activityForm.addEventListener("submit", function(event) {
     event.preventDefault();
 
@@ -198,28 +246,23 @@ activityForm.addEventListener("submit", function(event) {
     const dimensionAllocations = allocateDimensionXP(activityType, xpEarned);
 
     const careerEvent = createCareerEvent(
-    activityType,
-    amount,
-    activityDescription,
-    xpEarned,
-    dimensionAllocations
+        activityType,
+        amount,
+        activityDescription,
+        xpEarned,
+        dimensionAllocations
     );
     
     careerEvents.unshift(careerEvent);
+
+    saveCareerEvents();
 
     console.log("Career Event:", careerEvent);
     console.log("All Career Events:", careerEvents);
 
     console.log(dimensionXP);
 
-    totalXPDisplay.textContent = totalXP;
-
-    const currentLevel = calculateLevel(totalXP);
-    const currentRank = calculateRank(currentLevel);
-    updateLevelProgress(totalXP, currentLevel);
-    levelDisplay.textContent = `${currentLevel} (${currentRank})`;
-
-    updateDimensionBars();
+    updateDashboard();
 
     renderRecentActivity(careerEvent);
 
