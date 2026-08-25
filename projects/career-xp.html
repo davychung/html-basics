@@ -41,7 +41,9 @@
                 <input
                     type="number"
                     id="activity-amount"
-                    min="1"
+                    min="0.25"
+                    max="24"
+                    step="0.25"
                     placeholder="2"
                     required
                 >
@@ -55,6 +57,7 @@
                 >
 
                 <button type="submit">Add Activity</button>
+                <p id="form-message" role="status"></p>
 
                 <div id="xp-result">
                 <p>Total XP: <span id="total-xp">0</span></p>

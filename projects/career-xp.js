@@ -38,12 +38,45 @@ const dimensionXP = {
     creativity: 0
 };
 
-const storedCareerEvents =
-    localStorage.getItem("careerXPEvents");
+let storageLoadError = "";
 
-const careerEvents = storedCareerEvents
-    ? JSON.parse(storedCareerEvents)
-    : [];
+function loadCareerEvents() {
+    const storedCareerEvents =
+        localStorage.getItem("careerXPEvents");
+
+    if (!storedCareerEvents) {
+        return [];
+    }
+
+    try {
+        const parsedEvents = JSON.parse(storedCareerEvents);
+
+        if (!Array.isArray(parsedEvents)) {
+            throw new Error(
+                "Stored Career Events must be an array."
+            );
+        }
+
+        return parsedEvents;
+    } catch (error) {
+        console.error(
+            "Could not load Career XP events:",
+            error
+        );
+
+        localStorage.setItem(
+            "careerXPEventsBackup",
+            storedCareerEvents
+        );
+
+        storageLoadError =
+            "Saved activity data could not be loaded. A backup was preserved.";
+
+        return [];
+    }
+}
+
+const careerEvents = loadCareerEvents();
 
 const activityList = document.getElementById("activity-list");
 
@@ -52,6 +85,12 @@ const totalXPDisplay = document.getElementById("total-xp");
 const activityForm = document.getElementById("activity-form");
 
 const levelDisplay = document.getElementById("level");
+
+const formMessage = document.getElementById("form-message");
+
+if (storageLoadError) {
+    formMessage.textContent = storageLoadError;
+}
 
 const activityRules = {
     learning: {
@@ -256,11 +295,34 @@ activityForm.addEventListener("submit", function(event) {
     event.preventDefault();
 
     const activityType = document.getElementById("activity-type").value;
+
     const activityAmount = document.getElementById("activity-amount").value;
-    const activityDescription = document.getElementById("activity-description").value;
+
+    const activityDescription = document.getElementById("activity-description").value.trim();
 
     const amount = Number(activityAmount);
-    if (amount <= 0) {
+
+    formMessage.textContent = "";
+
+    if (!Object.hasOwn(activityRules, activityType)) {
+        formMessage.textContent =
+            "Please select a valid activity type.";
+        return;
+    }
+
+    if (
+        !Number.isFinite(amount) ||
+        amount < 0.25 ||
+        amount > 24
+    ) {
+        formMessage.textContent =
+            "Hours must be between 0.25 and 24.";
+        return;
+    }
+
+    if (activityDescription.length === 0) {
+        formMessage.textContent =
+            "Please describe what you worked on.";
         return;
     }
 
@@ -289,6 +351,9 @@ activityForm.addEventListener("submit", function(event) {
     careerEvent,
     evaluation.xpEarned
     );
+
+    formMessage.textContent = "Activity added.";
+    activityForm.reset();
 
     console.log("Type:", activityType);
     console.log("Amount:", activityAmount);
