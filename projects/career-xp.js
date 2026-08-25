@@ -232,15 +232,25 @@ function createCareerEvent(
 
 function renderRecentActivity(careerEvent, xpEarned) {
     const activityItem = document.createElement("li");
+    const activityText = document.createElement("span");
+    const deleteButton = document.createElement("button");
 
-    activityItem.textContent =
+    activityText.textContent =
         `${careerEvent.description} — ${careerEvent.activityType} — +${xpEarned} XP`;
 
-    activityList.prepend(activityItem);
+    deleteButton.type = "button";
+    deleteButton.textContent = "Delete";
 
-    if (activityList.children.length > 5) {
-        activityList.removeChild(activityList.lastElementChild);
-    }
+    deleteButton.addEventListener("click", function() {
+        deleteCareerEvent(careerEvent.id);
+    });
+
+    activityItem.append(
+        activityText,
+        deleteButton
+    );
+
+    activityList.prepend(activityItem);
 }
 
 function updateDashboard() {
@@ -261,7 +271,19 @@ function updateDashboard() {
     updateDimensionBars();
 }
 
+function resetDerivedState() {
+    totalXP = 0;
+
+    for (const dimension in dimensionXP) {
+        dimensionXP[dimension] = 0;
+    }
+
+    activityList.innerHTML = "";
+}
+
 function restoreCareerEvents() {
+    resetDerivedState();
+
     for (const careerEvent of careerEvents) {
         const evaluation = evaluateCareerEvent(careerEvent);
 
@@ -270,8 +292,8 @@ function restoreCareerEvents() {
 
     updateDashboard();
 
-    const recentEvents = careerEvents.slice(0, 5).reverse();
-
+    const recentEvents = [...careerEvents].reverse();
+    
     for (const careerEvent of recentEvents) {
         const evaluation = evaluateCareerEvent(careerEvent);
 
@@ -287,6 +309,32 @@ function saveCareerEvents() {
         "careerXPEvents",
         JSON.stringify(careerEvents)
     );
+}
+
+function deleteCareerEvent(eventId) {
+    const confirmed =
+        window.confirm("Delete this activity?");
+
+    if (!confirmed) {
+        return;
+    }
+
+    const eventIndex = careerEvents.findIndex(
+        careerEvent => careerEvent.id === eventId
+    );
+
+    if (eventIndex === -1) {
+        formMessage.textContent =
+            "That activity could not be found.";
+        return;
+    }
+
+    careerEvents.splice(eventIndex, 1);
+
+    saveCareerEvents();
+    restoreCareerEvents();
+
+    formMessage.textContent = "Activity deleted.";
 }
 
 function isValidCareerEvent(careerEvent) {
