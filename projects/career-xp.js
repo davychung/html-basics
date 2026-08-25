@@ -289,6 +289,55 @@ function saveCareerEvents() {
     );
 }
 
+function isValidCareerEvent(careerEvent) {
+    return (
+        careerEvent !== null &&
+        typeof careerEvent === "object" &&
+        Number.isFinite(careerEvent.id) &&
+        Object.hasOwn(
+            activityRules,
+            careerEvent.activityType
+        ) &&
+        careerEvent.measurements !== null &&
+        typeof careerEvent.measurements === "object" &&
+        Number.isFinite(
+            careerEvent.measurements.hours
+        ) &&
+        careerEvent.measurements.hours >= 0.25 &&
+        careerEvent.measurements.hours <= 24 &&
+        typeof careerEvent.description === "string" &&
+        careerEvent.description.trim().length > 0 &&
+        careerEvent.source === "manual" &&
+        typeof careerEvent.timestamp === "string" &&
+        !Number.isNaN(
+            Date.parse(careerEvent.timestamp)
+        )
+    );
+}
+
+function removeInvalidCareerEvents() {
+    const validEvents =
+        careerEvents.filter(isValidCareerEvent);
+
+    if (validEvents.length === careerEvents.length) {
+        return;
+    }
+
+    localStorage.setItem(
+        "careerXPEventsBackup",
+        JSON.stringify(careerEvents)
+    );
+
+    careerEvents.length = 0;
+    careerEvents.push(...validEvents);
+
+    saveCareerEvents();
+
+    formMessage.textContent =
+        "Some invalid saved activities were skipped. A backup was preserved.";
+}
+
+removeInvalidCareerEvents();
 restoreCareerEvents();
 
 activityForm.addEventListener("submit", function(event) {
