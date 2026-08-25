@@ -30,6 +30,9 @@ const dimensionDisplays = {
 const nextLevelText = document.getElementById("next-level-text");
 const levelProgressFill = document.getElementById("level-progress-fill");
 
+const exportDataButton = document.getElementById("export-data-button");
+const resetDataButton = document.getElementById("reset-data-button");
+
 const dimensionXP = {
     learning: 0,
     building: 0,
@@ -39,6 +42,63 @@ const dimensionXP = {
 };
 
 let storageLoadError = "";
+
+function exportCareerEvents() {
+    const exportData = {
+        exportVersion: 1,
+        exportedAt: new Date().toISOString(),
+        activityRules,
+        events: careerEvents
+    };
+
+    const fileContents =
+        JSON.stringify(exportData, null, 2);
+
+    const file = new Blob(
+        [fileContents],
+        { type: "application/json" }
+    );
+
+    const downloadUrl =
+        URL.createObjectURL(file);
+
+    const downloadLink =
+        document.createElement("a");
+
+    const date =
+        new Date().toISOString().slice(0, 10);
+
+    downloadLink.href = downloadUrl;
+    downloadLink.download =
+        `career-xp-export-${date}.json`;
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+
+    URL.revokeObjectURL(downloadUrl);
+
+    formMessage.textContent =
+        "Career XP data exported.";
+}
+
+function resetCareerEvents() {
+    const confirmed = window.confirm(
+        "Reset all Career XP data? This cannot be undone."
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    careerEvents.length = 0;
+
+    saveCareerEvents();
+    restoreCareerEvents();
+
+    formMessage.textContent =
+        "Career XP data reset.";
+}
 
 function loadCareerEvents() {
     const storedCareerEvents =
@@ -192,6 +252,9 @@ function updateDimensionBars() {
 
         dimensionDisplays[dimension].fill.style.width =
             `${percentage}%`;
+
+        dimensionDisplays[dimension].xp.textContent =
+            `${dimensionXP[dimension]} XP (${percentage.toFixed(1)}%)`;
     }
 }
 
@@ -256,11 +319,6 @@ function renderRecentActivity(careerEvent, xpEarned) {
 function updateDashboard() {
     totalXPDisplay.textContent = totalXP;
 
-    for (const dimension in dimensionXP) {
-        dimensionDisplays[dimension].xp.textContent =
-            `${dimensionXP[dimension]} XP`;
-    }
-
     const currentLevel = calculateLevel(totalXP);
     const currentRank = calculateRank(currentLevel);
 
@@ -293,7 +351,7 @@ function restoreCareerEvents() {
     updateDashboard();
 
     const recentEvents = [...careerEvents].reverse();
-    
+
     for (const careerEvent of recentEvents) {
         const evaluation = evaluateCareerEvent(careerEvent);
 
@@ -456,3 +514,13 @@ activityForm.addEventListener("submit", function(event) {
     console.log("Amount:", activityAmount);
     console.log("Description:", activityDescription);
 });
+
+exportDataButton.addEventListener(
+    "click",
+    exportCareerEvents
+);
+
+resetDataButton.addEventListener(
+    "click",
+    resetCareerEvents
+);
