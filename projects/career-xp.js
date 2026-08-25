@@ -38,6 +38,8 @@ const dimensionXP = {
     creativity: 0
 };
 
+const careerEvents = [];
+
 const activityList = document.getElementById("activity-list");
 
 const totalXPDisplay = document.getElementById("total-xp");
@@ -46,17 +48,55 @@ const activityForm = document.getElementById("activity-form");
 
 const levelDisplay = document.getElementById("level");
 
-const xpRates = {
-    learning: 20,
-    building: 30,
-    "problem-solving": 25,
-    career: 25,
-    creativity: 20
+const activityRules = {
+    learning: {
+        xpPerHour: 20,
+        dimensions: {
+            learning: 1
+        }
+    },
+
+    leetcode: {
+        xpPerHour: 25,
+        dimensions: {
+            "problem-solving": 0.7,
+            learning: 0.3
+        }
+    },
+
+    "project-work": {
+        xpPerHour: 30,
+        dimensions: {
+            building: 0.6,
+            "problem-solving": 0.2,
+            creativity: 0.2,
+        }
+    }
 };
 
 
 function calculateXP(activityType, amount){
-    return xpRates[activityType] * amount;
+    const rule = activityRules[activityType];
+
+    return rule.xpPerHour * amount;
+}
+
+function allocateDimensionXP(activityType, xpEarned) {
+    const dimensions = activityRules[activityType].dimensions;
+    const dimensionAllocations ={};
+
+    for (const dimension in dimensions) {
+        const allocation = dimensions[dimension];
+        const allocatedXP = xpEarned * allocation;
+        
+        dimensionXP[dimension] += allocatedXP;
+        dimensionAllocations[dimension] = allocatedXP;
+
+        dimensionDisplays[dimension].xp.textContent =
+            `${dimensionXP[dimension]} XP`;
+    }
+    
+    return dimensionAllocations;
 }
 
 function calculateLevel(totalXP) {
@@ -107,6 +147,37 @@ function updateLevelProgress(totalXP, currentLevel) {
         `${percentage}%`;
 }
 
+function createCareerEvent(
+    activityType,
+    amount,
+    activityDescription,
+    xpEarned,
+    dimensionAllocations
+) {
+    return{
+        id: Date.now(),
+        type: activityType,
+        amount,
+        description: activityDescription,
+        xpEarned,
+        dimensions: dimensionAllocations,
+        createdAt: new Date().toISOString()
+    };
+}
+
+function renderRecentActivity(careerEvent){
+    const activityItem = document.createElement("li");
+
+    activityItem.textContent =
+        `${careerEvent.description} — ${careerEvent.type} — +${careerEvent.xpEarned} XP`;
+
+    activityList.prepend(activityItem);
+
+    if (activityList.children.length > 5) {
+        activityList.removeChild(activityList.lastElementChild);
+    }
+}
+
 activityForm.addEventListener("submit", function(event) {
     event.preventDefault();
 
@@ -121,21 +192,25 @@ activityForm.addEventListener("submit", function(event) {
 
     const xpEarned = calculateXP(activityType, amount);
 
-    const percentage =
-    Math.min((dimensionXP[activityType] / 500) * 100, 100);
-
-    dimensionDisplays[activityType].fill.style.width =
-        `${percentage}%`;
-
     console.log("XP Earned:", xpEarned);
 
     totalXP += xpEarned;
+    const dimensionAllocations = allocateDimensionXP(activityType, xpEarned);
+
+    const careerEvent = createCareerEvent(
+    activityType,
+    amount,
+    activityDescription,
+    xpEarned,
+    dimensionAllocations
+    );
+    
+    careerEvents.unshift(careerEvent);
+
+    console.log("Career Event:", careerEvent);
+    console.log("All Career Events:", careerEvents);
+
     console.log(dimensionXP);
-
-    dimensionXP[activityType] += xpEarned;
-
-    dimensionDisplays[activityType].xp.textContent =
-    `${dimensionXP[activityType]} XP`;
 
     totalXPDisplay.textContent = totalXP;
 
@@ -146,16 +221,7 @@ activityForm.addEventListener("submit", function(event) {
 
     updateDimensionBars();
 
-    const activityItem = document.createElement("li");
-
-    activityItem.textContent =
-        `${activityDescription} — ${activityType} — +${xpEarned} XP`;
-
-    activityList.prepend(activityItem);
-
-    if (activityList.children.length > 5) {
-        activityList.removeChild(activityList.lastElementChild);
-    }
+    renderRecentActivity(careerEvent);
 
     console.log("Type:", activityType);
     console.log("Amount:", activityAmount);
